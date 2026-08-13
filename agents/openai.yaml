@@ -1,0 +1,4 @@
+interface:
+  display_name: "Eagle Review"
+  short_description: "Evidence-driven, read-only code review"
+  default_prompt: "Use $eagle-review to review the current repository changes."
