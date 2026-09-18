@@ -131,16 +131,30 @@ Read every changed hunk and check:
 
 Check how easily a developer can understand the code and change it safely:
 
-- Intent and flow: do names, comments, nesting, and state changes make behavior
-  clear, including side effects and error handling?
+- Self-describing code and naming: do names, types, and structure communicate
+  purpose and behavior? Names should use the domain's vocabulary, distinguish
+  related concepts, and make units and meaningful side effects clear when the
+  surrounding code or types do not. Flag vague names, unexplained abbreviations,
+  and misleading names when they obscure meaning in context. For a naming finding,
+  explain the ambiguity and suggest a specific clearer name. Respect established
+  conventions. Short names are appropriate when their meaning is obvious within
+  their scope. The standard is whether the code communicates clearly to its reader.
+- Intent and flow: do nesting and state changes make behavior clear, including
+  side effects and error handling? Prefer clearer code over comments that restate
+  mechanics. Keep comments that explain reasoning or constraints the code cannot
+  express.
 - Responsibilities: does each function or class have one clear responsibility?
   Check whether unrelated business logic or layers are mixed together, making
   changes harder to understand or implement.
-  Look more closely at functions with roughly 100 lines of code or 3 or more
-  distinct side effects. For classes with more than 10 methods, check whether
-  groups of methods would be clearer in separate classes. These numbers prompt
-  a closer review; a finding must explain which responsibilities are mixed and
-  why separating them would help. Smaller functions and classes can also mix
+  Look more closely at functions with roughly 100 lines of code, many branches,
+  or 3 or more distinct side effects. Trace their branches and effects to identify
+  mixed responsibilities and tangled flow. Report these problems with a concrete
+  refactor. A long function with few branches, minimal side effects, and one clear
+  responsibility is acceptable.
+  For classes with more than 10 methods, check whether groups of methods would be
+  clearer in separate classes. These numbers prompt a closer review. For a
+  responsibility finding, explain which responsibilities are mixed and why
+  separating them would help. Smaller functions and classes can also mix
   responsibilities.
 - Business logic and duplication: find where the changed business logic is
   implemented and which code calls it. Do callers share an implementation, or
@@ -217,6 +231,16 @@ Do not invent a runtime failure or future requirement to justify the finding.
 If an implementation breaks its contract and causes a bug, report the bug once
 under the relevant category.
 
+Use specific categories for code cleanliness findings: `naming` for unclear
+identifiers, `readability` for hard-to-follow flow or formatting, `duplication`
+for repeated logic, `design` for responsibilities, placement, or coupling, and
+`documentation` for missing or misleading explanations. Code cleanliness is
+only a review area; label each finding with its specific category.
+
+For long-function findings, classify the actual problem: mixed responsibilities are
+`design`, tangled flow is `readability`, and repeated logic is `duplication`.
+Explain the specific difficulty and the smallest useful refactor.
+
 For single-responsibility findings, suggest how to split the code: name the
 functions or classes, explain which logic and state each would manage, and say
 what stays in the original. Keep the suggestion focused on the problem and
@@ -263,7 +287,7 @@ Lead with findings, ordered by severity. Use one entry per underlying problem:
 Follow with one short paragraph explaining the problem and the smallest useful
 fix or check. Use one category from `design`, `correctness`, `security`,
 `stability`, `data-integrity`, `compatibility`, `performance`, `tests`,
-`maintainability`, or `documentation`.
+`naming`, `readability`, `duplication`, or `documentation`.
 Cite only the lines needed to locate the problem, including a changed line.
 
 After that paragraph, add a Mermaid `sequenceDiagram` only when the bug depends
