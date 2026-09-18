@@ -89,8 +89,8 @@ Do not review the diff in isolation. For each meaningful changed path:
   documentation only when a version-sensitive API or security claim cannot be
   established locally and an approved documentation tool is available.
 
-Spend the most depth on externally reachable paths, shared code, state/timing
-boundaries, persistence, authentication, and irreversible operations.
+Spend the most depth on externally reachable paths, shared code, persistence,
+authentication, and irreversible operations.
 
 ## 3. Review in two passes
 
@@ -104,8 +104,7 @@ boundaries, persistence, authentication, and irreversible operations.
 
 ### Implementation and adversarial pass
 
-Read every human-authored hunk and try to falsify the changed behavior with a
-concrete input, state, sequence, failure, timing, platform, or caller. Check:
+Read every changed hunk and check:
 
 1. Functional correctness: conditions, ordering, defaults, boundaries, state
    transitions, async behavior, stale state, and removed behavior.
@@ -124,17 +123,16 @@ concrete input, state, sequence, failure, timing, platform, or caller. Check:
 6. Tests: assertions must pin observable behavior and fail for the suspected
    regression. Report a test gap only when you can name the missing scenario and
    the defect it would catch.
-7. Maintainability: report only complexity, duplication, or coupling that creates
-   a concrete defect risk. Leave formatting and mechanical style to configured
-   tools.
+7. Code quality: naming, spelling, formatting, readability, duplication, coupling,
+   and separation of responsibilities.
 
 ## 4. Corroborate candidates
 
 For every candidate finding:
 
 1. Identify the smallest changed line that caused or exposed it.
-2. Demonstrate a reachable trigger or affected call path from repository evidence.
-3. State the observable wrong result, security impact, or concrete delivery risk.
+2. For behavior bugs, establish the triggering scenario from repository evidence.
+3. State the wrong behavior or concrete code-quality problem.
 4. Check guards, callers, tests, history, and local conventions for evidence that
    refutes it.
 5. When useful, run the smallest existing, targeted, non-mutating diagnostic that
@@ -143,49 +141,47 @@ For every candidate finding:
    it; otherwise record it as a verification limitation.
 6. Re-read the cited code before keeping the finding.
 
-Keep a high-impact security, data-loss, or compatibility concern with limited
-confidence only when the mechanism is real; state exactly what is uncertain and
-how to confirm it. Drop lower-impact candidates that cannot be proven.
-
 ## Finding threshold
 
 Report a finding only when all are true:
 
-- It was introduced or made newly reachable by the reviewed change.
-- It meaningfully affects correctness, security, stability, data integrity,
-  compatibility, performance, or maintainability.
+- The reviewed change introduced it or made it newly reachable.
+- It identifies a concrete behavior or code-quality problem.
 - It is discrete and actionable.
-- A concrete input, state, sequence, or call path demonstrates the problem.
+- Repository evidence supports it.
 - The author would probably fix it if they knew.
 
-Do not report speculative concerns, pre-existing debt, intentional behavior
-changes, generic best-practice advice, style nits, praise, or issues already
-reliably enforced by configured tooling. Consolidate symptoms with one root cause.
-Do not invent findings when the change is sound.
+For behavior bugs, show a realistic user action or ordinary app event that triggers
+the failure through the actual flow. Check existing protections; omit impossible or
+exceptionally unlikely scenarios.
+
+For code-quality feedback, identify the concrete problem without inventing a
+runtime consequence.
+
+Do not report speculative concerns, intentional behavior changes, generic best
+practices, or praise. Consolidate symptoms with one root cause.
+Do not invent findings.
 
 ## Severity
 
-- `P0`: broadly exploitable security failure, data loss, universal release
-  blocker, or critical system failure.
-- `P1`: likely user-visible regression, serious security/stability problem,
-  broken public contract, or major required behavior missing.
-- `P2`: ordinary correctness defect, reachable edge-case failure, meaningful
-  test gap tied to changed behavior, or concrete performance/maintainability risk.
-- `P3`: low-impact but real issue the author would still reasonably fix. Never use
-  P3 for cosmetic preferences.
-
-Severity reflects impact, not confidence.
+- `P0`: broadly exploitable security failure, data loss, universal release blocker,
+  or critical system failure.
+- `P1`: serious behavior, security, or stability problem requiring prompt correction.
+- `P2`: substantive correctness, performance, test, or maintainability problem
+  worth fixing in normal work.
+- `P3`: routine code-quality feedback, including naming, spelling, formatting,
+  readability, and separation of responsibilities.
 
 ## Writing standard
 
 Make every finding easy to understand on the first read. Write for a reader who
 understands the product but may not know this part of the codebase.
 
-- Lead with the user-visible or system-visible problem. Explain internal mechanics
+- Lead with the user-visible or code-quality problem. Explain internal mechanics
   only after the problem is clear.
 - Use plain English, short sentences, and one main idea per sentence. Prefer
   familiar words over technical jargon.
-- Start the explanation with a concrete shape such as: `When <condition>,
+- For behavior bugs, start with a concrete shape such as: `When <condition>,
   <wrong result>. This causes <impact>.`
 - Use exact code names in backticks when they help the reader locate the issue,
   but do not make the reader decode implementation terms to understand the bug.
@@ -203,10 +199,10 @@ Lead with findings, ordered by severity. Use one entry per root cause:
 
 `[P1][correctness] Plain-English problem title — path/to/file.ext:42`
 
-Follow with one short paragraph explaining the reachable scenario, the wrong
-behavior or impact, and the minimal fix or verification direction. Use one category
-from `design`, `correctness`, `security`, `stability`, `data-integrity`,
-`compatibility`, `performance`, `tests`, `maintainability`, or `documentation`.
+Follow with one short paragraph explaining the problem and the minimal fix or
+verification direction. Use one category from `design`, `correctness`, `security`,
+`stability`, `data-integrity`, `compatibility`, `performance`, `tests`,
+`maintainability`, or `documentation`.
 Keep the cited line range minimal and overlapping the reviewed diff.
 
 After that paragraph, add a Mermaid `sequenceDiagram` only when the bug depends
